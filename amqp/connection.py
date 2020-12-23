@@ -191,7 +191,7 @@ class Connection(AbstractChannel):
                  login_method=None, login_response=None,
                  authentication=(),
                  virtual_host='/', locale='en_US', client_properties=None,
-                 ssl=False, connect_timeout=None, channel_max=None,
+                 ssl=False, ssl_options={}, connect_timeout=None, channel_max=None,
                  frame_max=None, heartbeat=0, on_open=None, on_blocked=None,
                  on_unblocked=None, confirm_publish=False,
                  on_tune_ok=None, read_timeout=None, write_timeout=None,
@@ -258,6 +258,7 @@ class Connection(AbstractChannel):
 
         self.confirm_publish = confirm_publish
         self.ssl = ssl
+        self.ssl_options = ssl_options
         self.read_timeout = read_timeout
         self.write_timeout = write_timeout
         self.socket_settings = socket_settings
@@ -316,8 +317,9 @@ class Connection(AbstractChannel):
             return callback() if callback else None
         try:
             self.transport = self.Transport(
-                self.host, self.connect_timeout, self.ssl,
-                self.read_timeout, self.write_timeout,
+                self.host, self.connect_timeout,
+                self.ssl, self.ssl_options,
+                read_timeout=self.read_timeout, write_timout=self.write_timeout,
                 socket_settings=self.socket_settings,
             )
             self.transport.connect()

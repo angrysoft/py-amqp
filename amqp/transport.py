@@ -393,22 +393,52 @@ class SSLTransport(_AbstractTransport):
             :class:`~amqp.transport._AbstractTransport` class
     """
 
-    def __init__(self, host, connect_timeout=None, ssl=None, **kwargs):
-        self.sslopts = ssl if isinstance(ssl, dict) else {}
+    def __init__(self, host, connect_timeout=None, ssl_options={}, **kwargs):
+        self.ssl_options = ssl_options
         self._read_buffer = EMPTY_BUFFER
         super().__init__(
             host, connect_timeout=connect_timeout, **kwargs)
 
     def _setup_transport(self):
         """Wrap the socket in an SSL object."""
-        self.sock = self._wrap_socket(self.sock, **self.sslopts)
+        #self.sock = self._wrap_socket(self.sock, **self.sslopts)
+        self.sock = self.get_wrapped_socket(self.sock)
         self.sock.do_handshake()
         self._quick_recv = self.sock.read
+        
+    def get_wrapped_socket(self, sock:socket.socket):
+        if "ssl_version" in self.ssl_options:
+            context = ssl.SSLContext(self.ssl_options["ssl_version"])
+        else:
+            context = ssl.create_default_context()
+        
+        if "certfile" in self.ssl_options:
+            context.load_cert_chain(self.ssl_options["certfile"],
+                                    keyfile=self.ssl_options.get("keyfile"),
+                                    password=self.ssl_options.get("password"))
+        
+        if "cafile" in self.ssl_options:
+            context.load_verify_locations(self.ssl_options["cafile"])
+            
+        if "ciphers" in self.ssl_options:
+            context.set_ciphers(self.ssl_options["ciphers"])
+        
+        if "verify_mode" in self.ssl_options:
+            context.verify_mode = self.ssl_options["verify_mode"]
+        
+        wrapped_socket = context.wrap_socket(sock,
+                                             server_side=self.ssl_options.get("server_side", False),
+                                             do_handshake_on_connect=self.ssl_options.get("do_handshake_on_connect", True),
+                                             suppress_ragged_eofs=self.ssl_options.get("suppress_ragged_eofs"),
+                                             server_hostname=self.ssl_options.get("server_hostname"))
+        
+        return wrapped_socket   
 
     def _wrap_socket(self, sock, context=None, **sslopts):
         if context:
             return self._wrap_context(sock, sslopts, **context)
         return self._wrap_socket_sni(sock, **sslopts)
+    
 
     def _wrap_context(self, sock, sslopts, check_hostname=None, **ctx_options):
         """Wrap socket without SNI headers.
@@ -615,7 +645,7 @@ class TCPTransport(_AbstractTransport):
         return result
 
 
-def Transport(host, connect_timeout=None, ssl=False, **kwargs):
+def Transport(host, connect_timeout=None, ssl=False, ssl_options={}, **kwargs):
     """Create transport.
 
     Given a few parameters from the Connection constructor,
@@ -644,4 +674,4 @@ def Transport(host, connect_timeout=None, ssl=False, **kwargs):
             class
     """
     transport = SSLTransport if ssl else TCPTransport
-    return transport(host, connect_timeout=connect_timeout, ssl=ssl, **kwargs)
+    return transport(host, connect_timeout=connect_timeout, ssl=ssl, ssl_options=ssl_options, **kwargs)
