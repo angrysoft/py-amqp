@@ -316,7 +316,7 @@ class Connection(AbstractChannel):
         if self.connected:
             return callback() if callback else None
         try:
-            self.transport = self.Transport(
+            self.transport = Transport(
                 self.host, self.connect_timeout,
                 self.ssl, self.ssl_options,
                 read_timeout=self.read_timeout, write_timout=self.write_timeout,
@@ -454,14 +454,6 @@ class Connection(AbstractChannel):
     def _on_open_ok(self):
         self._handshake_complete = True
         self.on_open(self)
-
-    def Transport(self, host, connect_timeout,
-                  ssl=False, read_timeout=None, write_timeout=None,
-                  socket_settings=None, **kwargs):
-        return Transport(
-            host, connect_timeout=connect_timeout, ssl=ssl,
-            read_timeout=read_timeout, write_timeout=write_timeout,
-            socket_settings=socket_settings, **kwargs)
 
     @property
     def connected(self):

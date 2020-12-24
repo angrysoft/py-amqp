@@ -423,6 +423,9 @@ class SSLTransport(_AbstractTransport):
         if "ciphers" in self.ssl_options:
             context.set_ciphers(self.ssl_options["ciphers"])
         
+        if 'check_hostname' in self.ssl_options:
+            context.check_hostname = self.ssl_options["check_hostname"]
+        
         if "verify_mode" in self.ssl_options:
             context.verify_mode = self.ssl_options["verify_mode"]
         
@@ -674,4 +677,6 @@ def Transport(host, connect_timeout=None, ssl=False, ssl_options={}, **kwargs):
             class
     """
     transport = SSLTransport if ssl else TCPTransport
+    print(host, connect_timeout, ssl, ssl_options)
+    print(kwargs)
     return transport(host, connect_timeout=connect_timeout, ssl=ssl, ssl_options=ssl_options, **kwargs)
