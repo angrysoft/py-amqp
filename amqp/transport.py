@@ -439,31 +439,6 @@ class SSLTransport(_AbstractTransport):
         
         return wrapped_socket   
 
-    def _wrap_context(self, sock, sslopts, check_hostname=None, **ctx_options):
-        """Wrap socket without SNI headers.
-
-        PARAMETERS:
-            sock: socket.socket
-
-            Socket to be wrapped.
-
-            sslopts: dict
-
-                Parameters of  :attr:`ssl.SSLContext.wrap_socket`.
-
-            check_hostname
-
-                Whether to match the peer cert’s hostname. See
-                :attr:`ssl.SSLContext.check_hostname` for details.
-
-            ctx_options
-
-                Parameters of :attr:`ssl.create_default_context`.
-        """
-        ctx = ssl.create_default_context(**ctx_options)
-        ctx.check_hostname = check_hostname
-        return ctx.wrap_socket(sock, **sslopts)
-
     def _wrap_socket_sni(self, sock, keyfile=None, certfile=None,
                          server_side=False, cert_reqs=ssl.CERT_NONE,
                          ca_certs=None, do_handshake_on_connect=False,
