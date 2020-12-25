@@ -606,7 +606,7 @@ class test_SSLTransport:
     @pytest.fixture(autouse=True)
     def setup_transport(self):
         self.t = self.Transport(
-            'fe80::9a5a:ebff::fecb::ad1c:30', 3, ssl={'foo': 30},
+            'fe80::9a5a:ebff::fecb::ad1c:30', 3, ssl=True, ssl_options={'foo': 30},
         )
 
     def test_setup_transport(self):
