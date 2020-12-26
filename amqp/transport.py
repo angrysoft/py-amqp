@@ -437,7 +437,7 @@ class SSLTransport(_AbstractTransport):
                                              suppress_ragged_eofs=self.ssl_options.get("suppress_ragged_eofs", True),
                                              server_hostname=self.ssl_options.get("server_hostname"))
         
-        return wrapped_socket   
+        return wrapped_socket
 
     def _shutdown_transport(self):
         """Unwrap a SSL socket, so we can call shutdown()."""

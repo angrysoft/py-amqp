@@ -138,6 +138,28 @@ Consumer with acknowledgments disabled:
         while True:
             c.drain_events()
 
+Consumer ssl:
+
+.. code:: python
+    import amqp
+
+    ssl_options = {'certfile': "client_certificate.pem",
+                   'keyfile': "client_key.pem",
+                   'cafile': "ca_certificate.pem",
+                   'password': "secretpassword",
+                   'server_hostname': 'broker.example.com',
+                   'check_hostname': True}
+
+    with amqp.Connection(host="broker.example.com", ssl=True, ssl_options=ssl_options) as c:
+        ch = c.channel()
+        def on_message(message):
+            print(f'Received message (delivery tag: {message.delivery_tag}): {message.body}')
+            ch.basic_ack(message.delivery_tag)
+            
+        ch.basic_consume(queue='test', callback=on_message)
+        while True:
+            c.drain_events()
+
 Speedups
 ========
 
