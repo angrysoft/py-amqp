@@ -141,12 +141,13 @@ Consumer with acknowledgments disabled:
 Consumer ssl:
 
 .. code:: python
+
     import amqp
 
     ssl_options = {'certfile': "client_certificate.pem",
                    'keyfile': "client_key.pem",
                    'cafile': "ca_certificate.pem",
-                   'password': "secretpassword",
+                   'password': "secretpassword", # Certificate password
                    'server_hostname': 'broker.example.com',
                    'check_hostname': True}
 
